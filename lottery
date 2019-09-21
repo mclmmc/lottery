@@ -69,7 +69,7 @@ function lottery_it_lotto()
 	while [ $i -gt 0 ]
 	do
 		(( i-- ))
-		numeri=($(shuf -i1-90 -n$c))
+		numeri=($(shuf -i1-90 -n$c | sort -n))
 		[ $r -eq 0 ] && ruota="${Ruote[$(shuf -i0-11 -n1)]}"
 		printf "%9s " $ruota
 		printf "%2d " ${numeri[@]}
@@ -102,7 +102,7 @@ function lottery_it_superenalotto()
 	while [ $i -gt 0 ]
 	do
 		(( i-- ))
-		numeri=($(shuf -i1-90 -n6))
+		numeri=($(shuf -i1-90 -n6 | sort -n))
 		printf "%12s" " "
 		printf "%2d " ${numeri[@]} ; printf "\n"
 	done
