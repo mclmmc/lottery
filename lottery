@@ -1,0 +1,128 @@
+#!/usr/bin/bash
+
+function lottery_it_usage()
+{
+	printf "uso: lottery -l game [game option]\n"
+	printf "\n"
+	printf "\tgame = lotto o superenalotto\n"
+	printf "\n"
+	printf "\topzioni lotto:\n"
+	printf "\n"
+	printf "\t-r nome ruota\n"
+	printf "\t   se non specificata viene scelta automaticamente.\n"
+	printf "\t-n numero di giocate\n"
+	printf "\t-c [a|t|q|c]\n"
+	printf "\t   ambo|terno|quaterna|cinquina\n"
+	printf "\n"
+	printf "\topzioni superenalotto\n"
+	printf "\t-n numero di combinazioni da giocare\n"
+	printf "\t-s SuperStar\n"
+}
+
+function lottery_it_lotto_comb()
+{
+	local c=0
+
+	case $1 in
+		a) c=2 ;;
+		t) c=3 ;;
+		q) c=4 ;;
+		c) c=5 ;;
+	esac
+
+	echo $c
+}
+
+function lottery_it_lotto()
+{
+	local -a numeri=()
+	local -a Ruote=('bari'
+                        'cagliari'
+                        'firenze'
+                        'genova'
+                        'milano'
+                        'napoli'
+                        'palermo'
+                        'roma'
+                        'torino'
+                        'venezia'
+                        'nazionale'
+                        'tutte')
+	local ruota=""
+	local c=0
+	local i=1
+	local r=0
+
+	while [ $# -gt 0 ]
+	do
+		case $1 in
+			-r) ruota=$2 ; r=1 ; shift ;;
+			-n) i=$2 ; shift ;;
+			-c) c=$(lottery_it_lotto_comb $2) ; shift ;;
+			*) lottery_it_usage ; exit ;;
+		esac
+		shift
+	done
+
+	[ $c -eq 0 ] && c="$(shuf -i2-5 -n1)]}"
+
+	while [ $i -gt 0 ]
+	do
+		(( i-- ))
+		numeri=($(shuf -i1-90 -n$c))
+		[ $r -eq 0 ] && ruota="${Ruote[$(shuf -i0-11 -n1)]}"
+		printf "%9s " $ruota
+		printf "%2d " ${numeri[@]}
+		printf "\n"
+	done
+}
+
+function lottery_it_superenalotto()
+{
+	local -a numeri=()
+	local star=0
+	local i=1
+	local line=""
+
+	while [ $# -gt 0 ]
+	do
+		case $1 in
+			-n) i=$2 ; shift ;;
+			-s) star=$(shuf -i1-90 -n1) ;;
+			*) lottery_it_usage ; exit ;;
+		esac
+		shift
+	done
+
+	if [ $star -gt 0 ]
+	then
+		printf "Super Star: %d\n" $star
+	fi
+
+	while [ $i -gt 0 ]
+	do
+		(( i-- ))
+		numeri=($(shuf -i1-90 -n6))
+		printf "%12s" " "
+		printf "%2d " ${numeri[@]} ; printf "\n"
+	done
+}
+
+function lottery_it_main()
+{
+	if [ "$1" != "-l" ]
+	then
+		lottery_it_usage
+		exit
+	fi
+
+	shift
+
+	case $1 in
+		super|superenalotto) shift ; lottery_it_superenalotto "$@" ;;
+		lotto) shift ; lottery_it_lotto "$@" ;;
+		*) lottery_it_usage ;;
+	esac
+}
+
+lottery_it_main "$@"
